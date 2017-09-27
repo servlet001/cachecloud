@@ -100,17 +100,11 @@
 							<option value="6" <c:if test="${appSearch.appType == 6}">selected</c:if>>
 								redis-standalone
 							</option>
-		                    <option value="1" <c:if test="${appSearch.appType == 1}">selected</c:if>>
-		                        Memcached
-		                    </option>
-		                    <option value="3" <c:if test="${appSearch.appType == 3}">selected</c:if>>
-		                        MemcacheQ
-		                    </option>
 						</select>
 					 </div>
 					 <div class="form-group">
 						<select name="appStatus" class="form-control">
-							<option value="">
+							<option value="-1">
 								全部状态
 							</option>
 							<option value="0" <c:if test="${appSearch.appStatus == 0}">selected</c:if>>
@@ -125,8 +119,31 @@
 		                    <option value="3" <c:if test="${appSearch.appStatus == 3}">selected</c:if>>
 		                       	 已下线
 		                    </option>
+		                    <option value="4" <c:if test="${appSearch.appStatus == 4}">selected</c:if>>
+		                       	 驳回
+		                    </option>
 						</select>
 					 </div>
+					 <div class="form-group">
+						<select name="importantLevel" class="form-control">
+							<option value="">
+								全部级别
+							</option>
+							<option value="1" <c:if test="${appSearch.importantLevel == 1}">selected</c:if>>
+								S级
+							</option>
+							<option value="2" <c:if test="${appSearch.importantLevel == 2}">selected</c:if>>
+								A级
+							</option>
+							<option value="3" <c:if test="${appSearch.importantLevel == 3}">selected</c:if>>
+								B级
+							</option>
+		                    <option value="4" <c:if test="${appSearch.importantLevel == 4}">selected</c:if>>
+		                       	C级
+		                    </option>
+						</select>
+					 </div>
+					 
 					 <div class="form-group">
 						<select name="pageSize" class="form-control">
 							<option value="10" <c:if test="${page.pageSize == 10}">selected</c:if>>
@@ -176,8 +193,8 @@
 			                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
 			                   				${appDetail.appDesc.appId}
 			                    		</c:when>
-			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
-			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
+			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3 or appDetail.appDesc.status == 4}">
+			                    			<a title="${appDetail.appDesc.intro}" target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.appId}</a>
 			                    		</c:when>
 			                    	</c:choose>
 			                    </td>
@@ -186,7 +203,7 @@
 			                    		<c:when test="${appDetail.appDesc.status == 0 or appDetail.appDesc.status == 1}">
 			                    			${appDetail.appDesc.name}
 			                    		</c:when>
-			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3}">
+			                    		<c:when test="${appDetail.appDesc.status == 2 or appDetail.appDesc.status == 3 or appDetail.appDesc.status == 4}">
 			                    			<a target="_blank" href="/admin/app/index.do?appId=${appDetail.appDesc.appId}">${appDetail.appDesc.name}</a>
 			                    		</c:when>
 			                    	</c:choose>
@@ -201,16 +218,16 @@
 			                    <td>
 			                        <div class="progress margin-custom-bottom0">
 			                        	<c:choose>
-				                    		<c:when test="${appDetail.memUsePercent >= 80}">
-												<div class="progress-bar progress-bar-danger"
-													role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
-													aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">
-					                    	</c:when>
-				                    		<c:otherwise>
-												<div class="progress-bar progress-bar-success"
-													role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
-													aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">				                    		</c:otherwise>
-				                    	</c:choose>
+			                        		<c:when test="${appDetail.memUsePercent >= 80}">
+												<c:set var="progressBarStatus" value="progress-bar-danger"/>
+			                        		</c:when>
+			                        		<c:otherwise>
+												<c:set var="progressBarStatus" value="progress-bar-success"/>
+			                        		</c:otherwise>
+			                        	</c:choose>
+										<div class="progress-bar ${progressBarStatus}"
+											role="progressbar" aria-valuenow="${appDetail.memUsePercent}" aria-valuemax="100"
+											aria-valuemin="0" style="width: ${appDetail.memUsePercent}%">
 											<label style="color: #000000">
 												<fmt:formatNumber value="${appDetail.mem * appDetail.memUsePercent / 100 / 1024}" pattern="0.00"/>G&nbsp;&nbsp;Used/<fmt:formatNumber value="${appDetail.mem / 1024 * 1.0}" pattern="0.00"/>G&nbsp;&nbsp;Total
 											</label>
@@ -235,6 +252,7 @@
 			                    			<label class="label label-success">${appDetail.hitPercent}%</label>
 			                    		</c:otherwise>
 			                    	</c:choose>
+			                    	
 			                    </td>
 			                    <td>${appDetail.appDesc.appRunDays}天</td>
 			                    <td>
@@ -250,6 +268,9 @@
 			                    		</c:when>
 	                                    <c:when test="${appDetail.appDesc.status == 3}">
 	                                        <font color="red">已下线</font>
+	                                    </c:when>
+	                                    <c:when test="${appDetail.appDesc.status == 4}">
+	                                        <font color="red">驳回</font>
 	                                    </c:when>
 			                    	</c:choose>
 			                    </td>

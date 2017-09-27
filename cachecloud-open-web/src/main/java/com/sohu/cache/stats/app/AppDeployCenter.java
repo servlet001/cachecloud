@@ -1,11 +1,12 @@
 package com.sohu.cache.stats.app;
 
+import com.sohu.cache.constant.DataFormatCheckResult;
+import com.sohu.cache.constant.HorizontalResult;
 import com.sohu.cache.entity.AppDesc;
 import com.sohu.cache.entity.AppUser;
-import com.sohu.cache.redis.ReshardProcess;
+import com.sohu.cache.entity.InstanceReshardProcess;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * app相关发布操作
@@ -34,6 +35,14 @@ public interface AppDeployCenter {
 
 
     /**
+     * 为应用分配的资源格式检测
+     * @param appAuditId
+     * @param appDeployText
+     * @return
+     */
+    public DataFormatCheckResult checkAppDeployDetail(Long appAuditId, String appDeployText);
+
+    /**
      * 下线应用
      *
      * @param appId
@@ -42,7 +51,7 @@ public interface AppDeployCenter {
     public boolean offLineApp(Long appId);
 
     /**
-     * 修改应用下节点配置,仅限redis类型
+     * 修改应用下节点配置
      *
      * @param appId
      * @param appAuditId
@@ -56,22 +65,56 @@ public interface AppDeployCenter {
      * 垂直扩展
      *
      * @param appId
+     * @param appAuditId
      * @param memory 单位MB
      * @return
      */
     public boolean verticalExpansion(Long appId, Long appAuditId, int memory);
 
     /**
-     * 水平扩展(幂等操作)
-     *
-     * @param appId
-     * @param host
-     * @param port       单位MB
-     * @param appAuditId 审核id
+     * 检测水平扩容节点
+     * @param appAuditId
+     * @param masterSizeSlave
      * @return
      */
-    public boolean horizontalExpansion(Long appId, String host, int port, Long appAuditId);
-
+    public DataFormatCheckResult checkHorizontalNodes(Long appAuditId, String masterSizeSlave);
+    
+    /**
+     * 检查水平扩容的格式
+     * @param appId
+     * @param appAuditId
+     * @param sourceId
+     * @param targetId
+     * @param startSlot
+     * @param endSlot
+     * @param migrateType
+     * @return
+     */
+    public HorizontalResult checkHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+            int endSlot, int migrateType);
+    
+    
+    /**
+     * 开始水平扩容
+     * @param appId
+     * @param appAuditId
+     * @param sourceId
+     * @param targetId
+     * @param startSlot
+     * @param endSlot
+     * @param migrateType
+     * @return
+     */
+    public HorizontalResult startHorizontal(long appId, long appAuditId, long sourceId, long targetId, int startSlot,
+            int endSlot, int migrateType);
+    
+    /**
+     * 重试水平扩容
+     * @param instanceReshardProcessId
+     * @return
+     */
+    public HorizontalResult retryHorizontal(final int instanceReshardProcessId);
+    
     /**
      * 添加cluster一个主(从)节点
      *
@@ -81,24 +124,15 @@ public interface AppDeployCenter {
      * @param memory
      * @return
      */
-    public boolean addAppClusterSharding(Long appId, String masterHost, String slaveHost, int memory);
-
-    /**
-     * 下线集群节点
-     *
-     * @param appId
-     * @param host
-     * @param port
-     * @return
-     */
-    public boolean offLineClusterNode(Long appId, String host, int port);
+    public boolean addHorizontalNodes(Long appId, String masterHost, String slaveHost, int memory);
+    
 
     /**
      * 获取当前水平扩展进度列表
      *
      * @return
      */
-    public ConcurrentMap<Long, ReshardProcess> getHorizontalProcess();
+    public List<InstanceReshardProcess> getHorizontalProcess(long auditId);
     
     
     /**
@@ -108,4 +142,7 @@ public interface AppDeployCenter {
      * @return
      */
     public boolean cleanAppData(long appId, AppUser appUser);
+
+    
+
 }

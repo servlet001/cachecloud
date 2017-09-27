@@ -5,8 +5,6 @@
 <head>
     <title>CacheCloud用户申请</title>
     <script type="text/javascript">
-  	//验证手机号格式
-    var valPhones=/^(1[3|5|8][0-9]\d{4,8};){0,6}(1[3|5|8][0-9]\d{4,8})$/; 
     //验证邮箱格式
     var valEmails=/^(([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3};){0,6}([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.|\-]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
     function checkUser(){
@@ -39,13 +37,28 @@
     		mobile.focus();
     		return false;
     	}
-    	if(!valPhones.test(mobile.value)){
-    		alert("手机号格式错误!");
-    		mobile.focus();
-    		return false;
-    	}
     	return true;
     }
+    function checkUserNameExist(id) {
+    	var userName = document.getElementById(id).value;
+    	if(userName != ''){
+    		$.post(
+    			'/user/checkUserNameExist',
+    			{
+    				userName: userName,
+    			},
+    	        function(data){
+    	            if(data==1){
+    	            	alert("用户名已经存在，请修改或者联系管理员");
+    	            	document.getElementById(id).focus();
+    	            	document.getElementById(id).value="";
+    	            }
+    	        }
+    	     );
+    	}
+    }
+    
+    
     </script>
     <jsp:include page="/WEB-INF/include/head.jsp"/>
 </head>
@@ -81,7 +94,7 @@
 													域账户名:
 												</label>
 												<div class="col-md-5">
-													<input type="text" name="name" id="name" placeholder="域账户名(邮箱前缀)" class="form-control" />
+													<input type="text" name="name" id="name" placeholder="域账户名(邮箱前缀)" class="form-control" onchange="checkUserNameExist(this.id)"/>
 												</div>
 											</div>
 										
